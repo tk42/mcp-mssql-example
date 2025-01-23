@@ -1,0 +1,71 @@
+services:
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    platform: linux/amd64
+    ports:
+      - "1433:1433"
+    env_file:
+      - .env
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${MSSQL_SA_PASSWORD}
+    networks:
+      - mcp-network
+
+  # mcp-server:
+  #   build: ./mcp-server
+  #   platform: linux/amd64
+  #   ports:
+  #     - "8000:8000"
+  #   environment:
+  #     - DB_SERVER=${MSSQL_HOST}
+  #     - DB_NAME=${MSSQL_DATABASE}
+  #     - DB_USER=${MSSQL_USERNAME}
+  #     - DB_PASSWORD=${MSSQL_PASSWORD}
+  #     - ODBC_DRIVER=ODBC Driver 18 for SQL Server
+  #     - MAX_CONCURRENT_CONNECTIONS=5
+  #     - CONNECTION_TIMEOUT=300
+  #     - QUERY_TIMEOUT=60
+  #     - LLM_SERVER_URL=http://34.41.120.148:23178
+  #   env_file:
+  #     - .env
+  #   networks:
+  #     - mcp-network
+
+  fastmcp:
+    build: ./fastmcp
+    ports:
+      - "8080:8080"
+    depends_on:
+      - llama
+      - mssql
+    environment:
+      - LLAMA_SERVER_URL=http://llama:8000
+      - MSSQL_CONNECTION_STRING=DRIVER={ODBC Driver 18 for SQL Server};SERVER=mssql;DATABASE=master;UID=sa;PWD=YourStrongPassword123;TrustServerCertificate=yes;
+
+  # llm-server:
+  #   image: ghcr.io/ggerganov/llama.cpp:server
+  #   platform: linux/arm64
+  #   ports:
+  #     - "8001:8080"
+  #   volumes:
+  #     - ./llm-server/models:/models
+  #   environment:
+  #     - LLAMA_ARG_MODEL=/models/phi-4-Q4_K_M.gguf
+  #     - LLAMA_ARG_PORT=8080
+  #   networks:
+  #     - mcp-network
+
+  streamlit:
+    build: ./streamlit-client
+    platform: linux/amd64
+    ports:
+      - "8002:8501"
+    environment:
+      - MCP_SERVER_URL=http://mcp-server:8000
+    networks:
+      - mcp-network
+
+networks:
+  mcp-network:
+    driver: bridge

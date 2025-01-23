@@ -1,0 +1,11 @@
+streamlit==1.41.1
+pandas==2.2.3
+plotly==5.18.0
+python-dotenv==1.0.0
+pydantic==2.10.4
+streamlit-ace==0.1.1
+streamlit-extras==0.3.5
+altair==5.2.0
+watchdog==3.0.0
+pygments==2.17.2
+mcp==1.2.0

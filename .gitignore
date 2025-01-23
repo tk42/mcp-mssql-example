@@ -1,0 +1,7 @@
+Llama3-8B-1.58-100B-tokens-TQ1_0.gguf
+
+.DS_Store
+
+.env
+
+*.gguf
